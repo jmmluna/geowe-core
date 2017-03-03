@@ -65,6 +65,8 @@ public class LoadRasterLayerDialog extends Dialog {
 	private TextField nameWMTSField;
 	private TextField formatWMTSField;
 	private TextField tileMatrixSetField;
+	private TextField urlXYZField;
+	private TextField nameXYZField;
 
 	private PlainTabPanel tabPanel;
 
@@ -149,8 +151,30 @@ public class LoadRasterLayerDialog extends Dialog {
 		tabPanel.add(getWMSPanel(), "WMS");
 		tabPanel.add(getWMTSPanel(), "WMTS");
 		tabPanel.add(getTMSPanel(), "TMS");
+		tabPanel.add(getXYZPanel(), "XYZ");
 
 		return tabPanel;
+	}
+	
+	private VerticalPanel getXYZPanel() {
+		final VerticalPanel panel = new VerticalPanel();
+		panel.setWidth("350px");
+		panel.setSpacing(10);
+
+		urlXYZField = new TextField();
+		urlXYZField.setTitle(UIMessages.INSTANCE.lrasterdUrlField());
+		urlXYZField.setWidth(FIELD_WIDTH);
+		urlXYZField.setAllowBlank(false);
+
+		panel.add(urlXYZField);
+
+		nameXYZField = new TextField();
+		nameXYZField.setTitle(UIMessages.INSTANCE.lrasterdLayerNameField(""));
+		nameXYZField.setAllowBlank(false);
+		nameXYZField.setWidth(FIELD_WIDTH);
+		panel.add(nameXYZField);
+
+		return panel;
 	}
 
 	private VerticalPanel getTMSPanel() {
@@ -299,6 +323,32 @@ public class LoadRasterLayerDialog extends Dialog {
 	public void setTileMatrixSetField(String tileMatrixSetField) {
 		this.tileMatrixSetField.setText(tileMatrixSetField);
 	}
+	
+	public String getUrlXYZ() {
+		return urlXYZField.getText();
+	}
+	
+	public String getLayerNameXYZ() {
+		return nameXYZField.getText();
+	}
+	
+	public boolean isCorrectFilledXYZ() {
+		boolean isCorrect = true;
+		StringBuffer error = new StringBuffer("");
+		if (!isUrlXYZFieldCorrect()) {
+			error.append(" URL, ");
+			isCorrect = false;
+		}
+		if (nameXYZField.getText() == null || nameXYZField.getText().isEmpty()) {
+			error.append(" Layer Name, ");
+			isCorrect = false;
+		}		
+
+		if (!"".equals(error.toString())) {
+			showAlert(error.toString());
+		}
+		return isCorrect;
+	}
 
 	public boolean isCorrectFilledTMS() {
 		boolean isCorrect = true;
@@ -390,6 +440,11 @@ public class LoadRasterLayerDialog extends Dialog {
 		return (urlTMSField.getText() != null && !urlTMSField.getText()
 				.isEmpty());
 	}
+	
+	private boolean isUrlXYZFieldCorrect() {
+		return (urlXYZField.getText() != null && !urlXYZField.getText()
+				.isEmpty());
+	}
 
 	private void showAlert(String error) {
 		messageDialogBuilder.createError(
@@ -424,6 +479,22 @@ public class LoadRasterLayerDialog extends Dialog {
 		formatTMSField.setEmptyText("png, jpg...");
 
 		urlTMSField.addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				if (!event.getValue().startsWith("http")) {
+					showAlert("URL");
+				}
+			}
+		});
+	}
+	
+	public void initializeXYZFields() {
+		urlXYZField.setEmptyText("http://...");
+		nameXYZField.setEmptyText(UIMessages.INSTANCE
+				.lrasterdLayerNameField(" "));
+
+
+		urlXYZField.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
 				if (!event.getValue().startsWith("http")) {

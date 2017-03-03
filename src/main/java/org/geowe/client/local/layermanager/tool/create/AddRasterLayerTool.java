@@ -33,6 +33,8 @@ import org.geowe.client.local.main.map.GeoMap;
 import org.geowe.client.local.main.tool.map.catalog.model.TmsLayerDef;
 import org.geowe.client.local.main.tool.map.catalog.model.WmsLayerDef;
 import org.geowe.client.local.main.tool.map.catalog.model.WmtsLayerDef;
+import org.geowe.client.local.main.tool.map.catalog.model.XYZLayerDef;
+import org.geowe.client.local.messages.UICatalogMessages;
 import org.geowe.client.local.messages.UIMessages;
 import org.geowe.client.local.ui.MessageDialogBuilder;
 
@@ -77,6 +79,7 @@ public class AddRasterLayerTool extends LayerTool {
 		loadRasterLayerDialog.initializeWMSFields();
 		loadRasterLayerDialog.initializeWMTSFields();
 		loadRasterLayerDialog.initializeTMSFields();
+		loadRasterLayerDialog.initializeXYZFields();
 		loadRasterLayerDialog.show();
 	}
 
@@ -101,6 +104,11 @@ public class AddRasterLayerTool extends LayerTool {
 								.getActiveTab())
 								&& loadRasterLayerDialog.isCorrectFilledTMS()) {
 							loadTMS();
+						}
+						else if ("XYZ".equals(loadRasterLayerDialog
+								.getActiveTab())
+								&& loadRasterLayerDialog.isCorrectFilledXYZ()) {
+							loadXYZ();
 						}
 						else {
 							showAlert(UIMessages.INSTANCE
@@ -150,6 +158,23 @@ public class AddRasterLayerTool extends LayerTool {
 			tmsLayer.setName(loadRasterLayerDialog.getNameTMS());
 			tmsLayer.setFormat(loadRasterLayerDialog.getFormatTMS());
 			layerManagerWidget.addRaster(tmsLayer.getLayer());
+			loadRasterLayerDialog.hide();
+		}		
+	}
+	
+	private void loadXYZ() {
+		if (existLayer(loadRasterLayerDialog.getLayerNameXYZ())) {
+			showAlert(UIMessages.INSTANCE.aRasterltAlertMessageBoxTitle(),
+					UIMessages.INSTANCE.layerAlreadyExist(loadRasterLayerDialog
+							.getNameTMS()));//XYZ
+		} else {
+			
+			final XYZLayerDef xyzLayer = new XYZLayerDef();
+			xyzLayer.setESRILayerName(loadRasterLayerDialog.getLayerNameXYZ());
+			xyzLayer.setName(loadRasterLayerDialog.getLayerNameXYZ());			
+			xyzLayer.setUrl(loadRasterLayerDialog.getUrlXYZ());
+									
+			layerManagerWidget.addRaster(xyzLayer.getLayer());
 			loadRasterLayerDialog.hide();
 		}		
 	}
